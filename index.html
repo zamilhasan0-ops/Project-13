@@ -1,1 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 13 - Operational Portal</title>
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
+            --border-color: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --accent-teal: #0d9488;
+            --accent-green: #16a34a;
+            --accent-red: #dc2626;
+            --accent-indigo: #4f46e5;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Navigation Frame */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--accent-teal);
+            background-color: #f0fdfa;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* Core Page Layout Engine Wrap */
+        .main-wrapper {
+            margin-left: 260px;
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .master-layout {
+            width: 100%;
+            max-width: 1100px;
+            display: none;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+        }
+
+        .master-layout.active-page {
+            display: grid;
+        }
+
+        @media (max-width: 950px) {
+            .sidebar { display: none; }
+            .main-wrapper { margin-left: 0; }
+            .master-layout.active-page { grid-template-columns: 1fr; }
+        }
+
+        .left-pillar, .right-pillar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Premium Logo Header Card Layout */
+        .brand-header-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .logo-container {
+            width: 100%;
+            background: #090d16;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-logo-img {
+            width: 100%;
+            max-height: 140px;
+            object-fit: contain;
+        }
+
+        .meta-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .portal-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-teal);
+        }
+
+        .time-box { text-align: right; }
+        .live-time { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+        .live-date { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* View State Toggles Component */
+        .view-filter-tray {
+            display: flex;
+            gap: 6px;
+            background: var(--bg-input);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: fit-content;
+            margin-bottom: 4px;
+        }
+
+        .filter-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background-color: var(--accent-teal);
+            color: white;
+        }
+
+        /* Dashboard Element Standards */
+        .card, .inflation-box, .create-post-box, .post-card, .exchange-box, .fallback-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .deposit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card-full-width { grid-column: span 2; }
+        .card-title { font-size: 0.7rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+        .card-value { font-size: 1.15rem; font-weight: 700; }
+        .teal-text { color: var(--accent-teal); }
+        .red-text { color: var(--accent-red); }
+
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .section-title::before { content: ''; width: 3px; height: 12px; background-color: var(--accent-teal); border-radius: 1px; }
+
+        .list-container { display: flex; flex-direction: column; gap: 8px; }
+        .list-item {
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-info { display: flex; flex-direction: column; gap: 1px; }
+        .item-name { font-size: 0.8rem; font-weight: 600; }
+        .item-sub { font-size: 0.7rem; color: var(--text-muted); }
+        
+        .status-badge {
+            font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;
+            background: #e6f4ea; color: var(--accent-green); border: 1px solid #b7e1cd;
+        }
+        .status-badge.pipeline { background: #e0f2f1; color: var(--accent-teal); border: 1px solid #b2dfdb; }
+
+        /* Inflation Graph Architecture */
+        .inflation-stats { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+        .inflation-percentage { font-size: 1.4rem; font-weight: 700; color: var(--accent-red); }
+        .chart-container { height: 35px; display: flex; align-items: flex-end; gap: 6px; border-bottom: 1px solid var(--border-color); margin-top: 10px; }
+        .bar { flex: 1; background: #e2e8f0; border-radius: 2px 2px 0 0; }
+        .bar.growing { background: #cbd5e1; }
+        .bar.active-trend { background: var(--accent-red); }
+
+        /* Timeline Stream Elements */
+        .creator-header { display: flex; gap: 8px; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-indigo); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75rem; color: white; }
+        .post-textarea { flex: 1; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: var(--text-main); resize: none; font-size: 0.85rem; outline: none; }
+        .post-textarea:focus { border-color: var(--accent-teal); background: #fff; }
+        
+        .action-tray { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; }
+        .upload-options { display: flex; gap: 4px; }
+        
+        .upload-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 4px; font-weight: 500; }
+        .upload-btn:hover { background: #e2e8f0; }
+        .submit-post-btn { background: var(--accent-teal); color: #ffffff; border: none; padding: 5px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.75rem; }
+
+        .feed-container { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+        .post-card { display: flex; flex-direction: column; gap: 8px; }
+        .post-meta { display: flex; justify-content: space-between; align-items: center; }
+        .user-info { display: flex; align-items: center; gap: 8px; }
+        .username { font-weight: 600; font-size: 0.8rem; }
+        .timestamp { font-size: 0.7rem; color: var(--text-muted); }
+        .post-content { font-size: 0.85rem; line-height: 1.4; }
+        .attachment-preview { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 10px; font-size: 0.75rem; display: flex; align-items: center; gap: 6px; color: var(--accent-teal); font-weight: 500; }
+        
+        .post-actions-bar { display: flex; gap: 16px; border-top: 1px solid var(--border-color); padding-top: 8px; }
+        .social-btn { background: none; border: none; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+
+        .trends-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+        .trend-tag { background: var(--bg-card); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; color: var(--text-muted); }
+
+        /* Currency Grid Widget */
+        .exchange-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+        .rate-card { background: var(--bg-main); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 6px; }
+        .rate-label { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); }
+        .rate-value { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
+
+        /* Fallback Module Architecture Setup */
+        .fallback-box {
+            grid-column: span 2;
+            padding: 60px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .fallback-box h3 { color: var(--text-main); margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2>Project 13</h2>
+        </div>
+        <nav class="nav-menu">
+            <div class="nav-item active" data-target="dashboard-page">📊 Dashboard</div>
+            <div class="nav-item" data-target="deposits-page">💳 Deposits</div>
+            <div class="nav-item" data-target="expenses-page">🧾 Expenses</div>
+            <div class="nav-item" data-target="investments-page">📈 Investments</div>
+            <div class="nav-item" data-target="revenue-page">🔄 Revenue & Losses</div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="nav-item">🔔 Notifications</div>
+        </div>
+    </aside>
+
+    <main class="main-wrapper">
+        
+        <div class="master-layout active-page" id="dashboard-page">
+            
+            <div class="left-pillar">
+                <div class="brand-header-card">
+                    <div class="logo-container">
+                        <img src="Project 13 logo.png" alt="Project 13 Logo" class="main-logo-img" onerror="this.style.display='none'; document.getElementById('fb-txt').style.display='block';">
+                        <div id="fb-txt" style="display:none; padding:25px; font-weight:700; font-size:1.2rem; color:#ffffff; text-align:center;">
+                            PROJECT 13 PARTNERSHIP
+                        </div>
+                    </div>
+                    <div class="meta-bar">
+                        <div class="portal-tag">Ops Portal</div>
+                        <div class="time-box">
+                            <div class="live-time">00:00:00 AM</div>
+                            <div class="live-date">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view-filter-tray">
+                    <button class="filter-btn active" id="ownViewBtn" onclick="toggleViewPerspective('own')">Own View</button>
+                    <button class="filter-btn" id="allViewBtn" onclick="toggleViewPerspective('all')">All View</button>
+                </div>
+
+                <section class="deposit-grid">
+                    <div class="card">
+                        <div class="card-title" id="title-box-1">My Deposit</div>
+                        <div class="card-value teal-text" id="val-box-1">৳15,000</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" id="title-box-2">My Dues</div>
+                        <div class="card-value red-text" id="val-box-2">৳2,500</div>
+                    </div>
+                    <div class="card card-full-width">
+                        <div class="card-title" id="title-box-3">Total Fund Deposits</div>
+                        <div class="card-value" id="val-box-3">৳401,100</div>
+                    </div>
+                </section>
+
+                <section class="exchange-box">
+                    <h2 class="section-title">Logistics Exchange Rates</h2>
+                    <div class="exchange-grid">
+                        <div class="rate-card">
+                            <div class="rate-label">USD to BDT</div>
+                            <div class="rate-value">৳117.80</div>
+                        </div>
+                        <div class="rate-card">
+                            <div class="rate-label">CNY to BDT</div>
+                            <div class="rate-value">৳16.22</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="list-container">
+                    <h2 class="section-title">Current Asset Investments</h2>
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-name">SME Capital Deployment</span>
+                            <span class="item-sub">Allocated: ৳200,000</span>
+                        </div>
+                        <span class="status-badge">Active</span>
+                    </div>
+                </section>
+
+                <section class="list-container">
+                    <h2 class="section-title">Future Potential Pipelines</h2>
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-name">Commercial Agro Venture</span>
+                            <span class="item-sub">Target Launch: Q3</span>
+                        </div>
+                        <span class="status-badge pipeline">Evaluating</span>
+                    </div>
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-name">Import & Retail Sourcing</span>
+                            <span class="item-sub">Feasibility Phase</span>
+                        </div>
+                        <span class="status-badge pipeline">Evaluating</span>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="inflation-box">
+                        <div class="inflation-stats">
+                            <div>
+                                <h2 class="section-title">Market Inflation Tracker</h2>
+                                <span class="item-sub" style="font-size:0.65rem;">BBS Data Feed</span>
+                            </div>
+                            <div class="inflation-percentage">9.42%</div>
+                        </div>
+                        <div class="chart-container">
+                            <div class="bar growing" style="height: 30%;"></div>
+                            <div class="bar growing" style="height: 45%;"></div>
+                            <div class="bar growing" style="height: 40%;"></div>
+                            <div class="bar growing" style="height: 60%;"></div>
+                            <div class="bar growing" style="height: 75%;"></div>
+                            <div class="bar active-trend" style="height: 94%;"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-pillar">
+                <div class="trends-scroll">
+                    <div class="trend-tag">📈 Organic Farming</div>
+                    <div class="trend-tag">⚡ AI Agencies</div>
+                    <div class="trend-tag">🌱 Jute Micro-Export</div>
+                    <div class="trend-tag">📦 Tech E-Commerce</div>
+                </div>
+
+                <div class="create-post-box">
+                    <div class="creator-header">
+                        <div class="avatar" style="background-color: #db2777;">ME</div>
+                        <textarea id="postInput" class="post-textarea" rows="2" placeholder="Write field log, link documents, or tag scouting coordinates..."></textarea>
+                    </div>
+                    <div class="action-tray">
+                        <div class="upload-options">
+                            <button class="upload-btn" onclick="stageAttachment('📷 Field Photo Attached')">📷 Photo</button>
+                            <button class="upload-btn" onclick="stageAttachment('📄 LC_Draft_v1.pdf')">📄 Doc</button>
+                            <button class="upload-btn" onclick="stageAttachment('📍 Karwan Bazar, Dhaka')">📍 Location</button>
+                        </div>
+                        <button class="submit-post-btn" onclick="executePublish()">Publish</button>
+                    </div>
+                    <div id="attachmentIndicator" style="margin-top: 6px; font-size: 0.7rem; color: var(--accent-teal); display: none; font-weight: 600;"></div>
+                </div>
+
+                <div class="feed-container" id="feed">
+                    <div class="post-card">
+                        <div class="post-meta">
+                            <div class="user-info">
+                                <div class="avatar" style="background-color: #4b5563;">M4</div>
+                                <div>
+                                    <div class="username">Member 4 (Sourcing Manager)</div>
+                                    <div class="timestamp">Today at 10:42 AM</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            Just finalized the quality check metrics for our target footwear inventory lines. Attaching the full specification overview here for group review.
+                        </div>
+                        <div class="attachment-preview"><span>📄 Footwear_Specs_v2.pdf (1.4 MB)</span></div>
+                        <div class="post-actions-bar">
+                            <button class="social-btn" onclick="alert('Upvoted!')">🔥 Upvote (5)</button>
+                            <button class="social-btn">💬 Discuss (2)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="master-layout" id="deposits-page">
+            <div class="fallback-box">
+                <h3>💳 Deposits Ledger Panel</h3>
+                <p>Detailed tracking of monthly ledger logs maps natively inside this framework view.</p>
+            </div>
+        </div>
+
+        <div class="master-layout" id="expenses-page">
+            <div class="fallback-box">
+                <h3>🧾 Expenses Allocation Streams</h3>
+                <p>Procurement allocations and asset stream logging configurations.</p>
+            </div>
+        </div>
+
+        <div class="master-layout" id="investments-page">
+            <div class="fallback-box">
+                <h3>📈 Project Venture Breakdown</h3>
+                <p>Active timeline scheduling metrics matrices.</p>
+            </div>
+        </div>
+
+        <div class="master-layout" id="revenue-page">
+            <div class="fallback-box">
+                <h3>🔄 Profit Allocation Matrix</h3>
+                <p>Yield metrics mapping distributions over standard business cycles.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let stagedAttachment = "";
+
+        // Core Sidebar Tab Swapper Engine
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.master-layout');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetPageId = item.getAttribute('data-target');
+                if (!targetPageId) return;
+
+                navItems.forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+
+                pages.forEach(p => p.classList.remove('active-page'));
+                document.getElementById(targetPageId).classList.add('active-page');
+            });
+        });
+
+        // Toggle Perspective Engine (Own View vs All View Data Swapping)
+        function toggleViewPerspective(type) {
+            const ownBtn = document.getElementById('ownViewBtn');
+            const allBtn = document.getElementById('allViewBtn');
+            
+            const title1 = document.getElementById('title-box-1');
+            const val1 = document.getElementById('val-box-1');
+            const title2 = document.getElementById('title-box-2');
+            const val2 = document.getElementById('val-box-2');
+            const title3 = document.getElementById('title-box-3');
+            const val3 = document.getElementById('val-box-3');
+
+            if (type === 'own') {
+                ownBtn.classList.add('active');
+                allBtn.classList.remove('active');
+                
+                title1.textContent = "My Deposit";
+                val1.textContent = "৳15,000";
+                title2.textContent = "My Dues";
+                val2.textContent = "৳2,500";
+                title3.textContent = "Total Fund Deposits";
+                val3.textContent = "৳401,100";
+            } else {
+                allBtn.classList.add('active');
+                ownBtn.classList.remove('active');
+                
+                title1.textContent = "Fund Balance";
+                val1.textContent = "৳188,881";
+                title2.textContent = "Total Collected";
+                val2.textContent = "৳401,100";
+                title3.textContent = "Outstanding Dues";
+                val3.textContent = "৳90,900";
+            }
+        }
+
+        // Live Log Feed Attachment Handling
+        function stageAttachment(desc) {
+            stagedAttachment = desc;
+            const indicator = document.getElementById("attachmentIndicator");
+            indicator.textContent = `Staged: ${desc}`;
+            indicator.style.display = "block";
+        }
+
+        // Live Stream Post Execution Code
+        function executePublish() {
+            const textInput = document.getElementById("postInput");
+            const text = textInput.value.trim();
+            
+            if (text === "" && stagedAttachment === "") return;
+
+            const feed = document.getElementById("feed");
+            const newPost = document.createElement("div");
+            newPost.className = "post-card";
+            
+            const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            let attachmentHTML = stagedAttachment ? `<div class="attachment-preview"><span>${stagedAttachment}</span></div>` : "";
+
+            newPost.innerHTML = `
+                <div class="post-meta">
+                    <div class="user-info">
+                        <div class="avatar" style="background-color: #db2777;">ME</div>
+                        <div>
+                            <div class="username">You (Portal Manager)</div>
+                            <div class="timestamp">Just now at ${timeString}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-content">${text || "Shared an operational log link attachment update."}</div>
+                ${attachmentHTML}
+                <div class="post-actions-bar">
+                    <button class="social-btn" onclick="alert('Upvoted!')">🔥 Upvote (0)</button>
+                    <button class="social-btn">💬 Discuss (0)</button>
+                </div>`;
+
+            feed.insertBefore(newPost, feed.firstChild);
+            textInput.value = "";
+            stagedAttachment = "";
+            document.getElementById("attachmentIndicator").style.display = "none";
+        }
+
+        // Dynamic System Clock Loop Sync Handler
+        function updateSystemClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12; 
+            
+            const timeStrings = document.querySelectorAll('.live-time');
+            const dateStrings = document.querySelectorAll('.live-date');
+            
+            timeStrings.forEach(t => t.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`);
+            dateStrings.forEach(d => d.textContent = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }));
+        }
+
+        setInterval(updateSystemClock, 1000);
+        updateSystemClock();
+    </script>
+</body>
+</html>

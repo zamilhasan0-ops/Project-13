@@ -24,6 +24,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -31,9 +32,10 @@
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
+            flex-direction: row;
         }
 
-        /* Sidebar Navigation Frame */
+        /* Sidebar Navigation Frame (Desktop) */
         .sidebar {
             width: 260px;
             background-color: var(--bg-sidebar);
@@ -110,12 +112,6 @@
 
         .master-layout.active-page {
             display: grid;
-        }
-
-        @media (max-width: 950px) {
-            .sidebar { display: none; }
-            .main-wrapper { margin-left: 0; }
-            .master-layout.active-page { grid-template-columns: 1fr; }
         }
 
         .left-pillar, .right-pillar {
@@ -289,7 +285,6 @@
         .rate-label { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); }
         .rate-value { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
 
-        /* Fallback Module Architecture Setup */
         .fallback-box {
             grid-column: span 2;
             padding: 60px;
@@ -297,6 +292,73 @@
             color: var(--text-muted);
         }
         .fallback-box h3 { color: var(--text-main); margin-bottom: 8px; }
+
+        /* ================== 🔥 MOBILE RESPONSIVE ENGINE MEDIA QUERY ================== */
+        @media (max-width: 850px) {
+            body {
+                flex-direction: column;
+                padding-bottom: 70px; /* Leaves clean breathing space for bottom nav bar */
+            }
+
+            /* Transform Left Sidebar into App-Style Fixed Bottom Nav Bar */
+            .sidebar {
+                width: 100%;
+                height: 60px;
+                flex-direction: row;
+                padding: 4px 10px;
+                border-right: none;
+                border-top: 1px solid var(--border-color);
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            }
+
+            .sidebar-brand, .sidebar-footer {
+                display: none; /* Hide clean headers/footers to maximize touch space */
+            }
+
+            .nav-menu {
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+                gap: 2px;
+            }
+
+            .nav-item {
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 3px;
+                font-size: 0.65rem; /* Text size for mobile icons */
+                padding: 4px 6px;
+                flex: 1;
+                text-align: center;
+                border-radius: 4px;
+            }
+
+            /* Main Layout Adjustments for Mobile Views */
+            .main-wrapper {
+                margin-left: 0;
+                padding: 12px;
+                width: 100%;
+            }
+
+            .master-layout.active-page {
+                grid-template-columns: 1fr; /* Switch double pillars down into single vertical line stack */
+                gap: 14px;
+            }
+
+            .deposit-grid {
+                grid-template-columns: 1fr 1fr; /* Retains clean side-by-side metric tiles */
+            }
+
+            .fallback-box {
+                padding: 30px 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -310,7 +372,7 @@
             <div class="nav-item" data-target="deposits-page">💳 Deposits</div>
             <div class="nav-item" data-target="expenses-page">🧾 Expenses</div>
             <div class="nav-item" data-target="investments-page">📈 Investments</div>
-            <div class="nav-item" data-target="revenue-page">🔄 Revenue & Losses</div>
+            <div class="nav-item" data-target="revenue-page">🔄 Rev & Loss</div>
         </nav>
         <div class="sidebar-footer">
             <div class="nav-item">🔔 Notifications</div>
@@ -433,13 +495,13 @@
                 <div class="create-post-box">
                     <div class="creator-header">
                         <div class="avatar" style="background-color: #db2777;">ME</div>
-                        <textarea id="postInput" class="post-textarea" rows="2" placeholder="Write field log, link documents, or tag scouting coordinates..."></textarea>
+                        <textarea id="postInput" class="post-textarea" rows="2" placeholder="Write field log, link documents..."></textarea>
                     </div>
                     <div class="action-tray">
                         <div class="upload-options">
                             <button class="upload-btn" onclick="stageAttachment('📷 Field Photo Attached')">📷 Photo</button>
                             <button class="upload-btn" onclick="stageAttachment('📄 LC_Draft_v1.pdf')">📄 Doc</button>
-                            <button class="upload-btn" onclick="stageAttachment('📍 Karwan Bazar, Dhaka')">📍 Location</button>
+                            <button class="upload-btn" onclick="stageAttachment('📍 Karwan Bazar, Dhaka')">📍 Loc</button>
                         </div>
                         <button class="submit-post-btn" onclick="executePublish()">Publish</button>
                     </div>
@@ -504,7 +566,7 @@
     <script>
         let stagedAttachment = "";
 
-        // Core Sidebar Tab Swapper Engine
+        // Tab Swapping Script Hook Engine Logic
         const navItems = document.querySelectorAll('.nav-item');
         const pages = document.querySelectorAll('.master-layout');
 
@@ -518,10 +580,13 @@
 
                 pages.forEach(p => p.classList.remove('active-page'));
                 document.getElementById(targetPageId).classList.add('active-page');
+                
+                // Automatically scrolls window to top when changing views on mobile screen frames
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
-        // Toggle Perspective Engine (Own View vs All View Data Swapping)
+        // Perspective Swapping Calculation Engine Logic (Own View vs All View)
         function toggleViewPerspective(type) {
             const ownBtn = document.getElementById('ownViewBtn');
             const allBtn = document.getElementById('allViewBtn');
@@ -601,7 +666,7 @@
             document.getElementById("attachmentIndicator").style.display = "none";
         }
 
-        // Dynamic System Clock Loop Sync Handler
+        // System Sync Live Clock Engine Integration
         function updateSystemClock() {
             const now = new Date();
             let hours = now.getHours();

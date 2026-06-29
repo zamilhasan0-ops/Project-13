@@ -6,7 +6,7 @@
     <title>Project 13 - Operational Portal</title>
     <style>
         :root {
-            --bg-main: #f8fafc;
+            --bg-main: #f0f2f5; /* Facebook-inspired light gray background */
             --bg-sidebar: #ffffff;
             --bg-card: #ffffff;
             --bg-input: #f1f5f9;
@@ -17,6 +17,7 @@
             --accent-green: #16a34a;
             --accent-red: #dc2626;
             --accent-indigo: #4f46e5;
+            --header-height: 56px;
         }
 
         * {
@@ -32,37 +33,120 @@
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
         }
 
-        /* Sidebar Navigation Frame (Desktop) */
+        /* ================= GLOBAL TOP HEADER BAR ================= */
+        .top-header {
+            height: var(--header-height);
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 2000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Mobile Hamburger Icon */
+        .menu-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-main);
+            cursor: pointer;
+            display: none; /* Hidden on desktop */
+            padding: 4px;
+        }
+
+        .header-logo-container {
+            height: 36px;
+            display: flex;
+            align-items: center;
+            background: #090d16;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .header-logo-img {
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-teal);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px var(--border-color);
+        }
+
+        .header-icon-btn {
+            background: #f1f5f9;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        /* ================= APP STRUCTURAL FRAMES ================= */
+        .app-container {
+            display: flex;
+            flex: 1;
+            margin-top: var(--header-height);
+        }
+
+        /* Sidebar Side Navigation (Desktop Permanent / Mobile Slide Drawer) */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 16px;
             position: fixed;
-            top: 0;
+            top: var(--header-height);
             bottom: 0;
             left: 0;
-            z-index: 1000;
-        }
-
-        .sidebar-brand h2 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+            z-index: 1500;
+            transition: transform 0.3s ease;
         }
 
         .nav-menu {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             flex: 1;
         }
 
@@ -70,12 +154,12 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 14px;
-            color: var(--text-muted);
+            padding: 12px 14px;
+            color: var(--text-main);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -88,25 +172,23 @@
         .sidebar-footer {
             border-top: 1px solid var(--border-color);
             padding-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
         }
 
-        /* Core Page Layout Engine Wrap */
+        /* Main Scrollable Center Content Wrap */
         .main-wrapper {
-            margin-left: 260px;
+            margin-left: 280px;
             flex: 1;
             padding: 20px;
             display: flex;
             justify-content: center;
+            min-width: 0;
         }
 
         .master-layout {
             width: 100%;
             max-width: 1100px;
             display: none;
-            grid-template-columns: 380px 1fr;
+            grid-template-columns: 1fr 380px; /* Center-focused layout scheme */
             gap: 20px;
         }
 
@@ -118,39 +200,39 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            min-width: 0;
         }
 
-        /* Premium Logo Header Card Layout */
-        .brand-header-card {
+        /* Mobile Sidebar Drawer Overlay Backdrop */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1400;
+        }
+
+        /* ================= CARDS & INTERFACE ELEMENTS ================= */
+        .card, .inflation-box, .create-post-box, .post-card, .exchange-box, .fallback-box {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .logo-container {
-            width: 100%;
-            background: #090d16;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .main-logo-img {
-            width: 100%;
-            max-height: 140px;
-            object-fit: contain;
-        }
-
-        .meta-bar {
+        .meta-strip {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 14px;
             background: #ffffff;
-            border-top: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         .portal-tag {
@@ -161,28 +243,31 @@
             color: var(--accent-teal);
         }
 
-        .time-box { text-align: right; }
         .live-time { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
-        .live-date { font-size: 0.7rem; color: var(--text-muted); }
+        .live-date { font-size: 0.7rem; color: var(--text-muted); text-align: right; }
 
-        /* View State Toggles Component */
+        .deposit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card-full-width { grid-column: span 2; }
+        .card-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+        .card-value { font-size: 1.3rem; font-weight: 700; }
+        .teal-text { color: var(--accent-teal); }
+        .red-text { color: var(--accent-red); }
+
         .view-filter-tray {
             display: flex;
             gap: 6px;
-            background: var(--bg-input);
+            background: #e4e6eb;
             padding: 4px;
             border-radius: 8px;
-            border: 1px solid var(--border-color);
             width: fit-content;
-            margin-bottom: 4px;
         }
 
         .filter-btn {
             background: none;
             border: none;
             color: var(--text-muted);
-            padding: 6px 14px;
-            font-size: 0.8rem;
+            padding: 8px 16px;
+            font-size: 0.85rem;
             font-weight: 600;
             border-radius: 6px;
             cursor: pointer;
@@ -190,25 +275,10 @@
         }
 
         .filter-btn.active {
-            background-color: var(--accent-teal);
-            color: white;
+            background-color: #ffffff;
+            color: var(--text-main);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-
-        /* Dashboard Element Standards */
-        .card, .inflation-box, .create-post-box, .post-card, .exchange-box, .fallback-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .deposit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card-full-width { grid-column: span 2; }
-        .card-title { font-size: 0.7rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
-        .card-value { font-size: 1.15rem; font-weight: 700; }
-        .teal-text { color: var(--accent-teal); }
-        .red-text { color: var(--accent-red); }
 
         .section-title {
             font-size: 0.85rem;
@@ -217,33 +287,36 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
         .section-title::before { content: ''; width: 3px; height: 12px; background-color: var(--accent-teal); border-radius: 1px; }
 
         .list-container { display: flex; flex-direction: column; gap: 8px; }
         .list-item {
             background: var(--bg-card);
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .item-info { display: flex; flex-direction: column; gap: 1px; }
-        .item-name { font-size: 0.8rem; font-weight: 600; }
-        .item-sub { font-size: 0.7rem; color: var(--text-muted); }
+        .item-info { display: flex; flex-direction: column; gap: 2px; }
+        .item-name { font-size: 0.85rem; font-weight: 600; }
+        .item-sub { font-size: 0.75rem; color: var(--text-muted); }
         
         .status-badge {
-            font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;
+            font-size: 0.65rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;
             background: #e6f4ea; color: var(--accent-green); border: 1px solid #b7e1cd;
         }
         .status-badge.pipeline { background: #e0f2f1; color: var(--accent-teal); border: 1px solid #b2dfdb; }
 
-        /* Inflation Graph Architecture */
+        .exchange-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+        .rate-card { background: var(--bg-main); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; }
+        .rate-label { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); }
+        .rate-value { font-size: 0.95rem; font-weight: 700; }
+
         .inflation-stats { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
         .inflation-percentage { font-size: 1.4rem; font-weight: 700; color: var(--accent-red); }
         .chart-container { height: 35px; display: flex; align-items: flex-end; gap: 6px; border-bottom: 1px solid var(--border-color); margin-top: 10px; }
@@ -251,220 +324,240 @@
         .bar.growing { background: #cbd5e1; }
         .bar.active-trend { background: var(--accent-red); }
 
-        /* Timeline Stream Elements */
+        /* Timeline Publisher Module Components */
         .creator-header { display: flex; gap: 8px; }
-        .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-indigo); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75rem; color: white; }
-        .post-textarea { flex: 1; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; color: var(--text-main); resize: none; font-size: 0.85rem; outline: none; }
-        .post-textarea:focus { border-color: var(--accent-teal); background: #fff; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-indigo); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; color: white; }
+        .post-textarea { flex: 1; background: #f0f2f5; border: none; border-radius: 20px; padding: 10px 16px; color: var(--text-main); resize: none; font-size: 0.9rem; outline: none; }
         
-        .action-tray { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; }
+        .action-tray { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px; }
         .upload-options { display: flex; gap: 4px; }
-        
-        .upload-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 4px; font-weight: 500; }
-        .upload-btn:hover { background: #e2e8f0; }
-        .submit-post-btn { background: var(--accent-teal); color: #ffffff; border: none; padding: 5px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.75rem; }
+        .upload-btn { background: #f1f5f9; border: none; color: var(--text-main); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 20px; font-weight: 500; }
+        .submit-post-btn { background: var(--accent-teal); color: #ffffff; border: none; padding: 6px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 0.8rem; }
 
-        .feed-container { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
-        .post-card { display: flex; flex-direction: column; gap: 8px; }
+        .feed-container { display: flex; flex-direction: column; gap: 12px; }
         .post-meta { display: flex; justify-content: space-between; align-items: center; }
         .user-info { display: flex; align-items: center; gap: 8px; }
-        .username { font-weight: 600; font-size: 0.8rem; }
+        .username { font-weight: 600; font-size: 0.85rem; }
         .timestamp { font-size: 0.7rem; color: var(--text-muted); }
-        .post-content { font-size: 0.85rem; line-height: 1.4; }
-        .attachment-preview { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 10px; font-size: 0.75rem; display: flex; align-items: center; gap: 6px; color: var(--accent-teal); font-weight: 500; }
-        
+        .post-content { font-size: 0.9rem; line-height: 1.4; }
+        .attachment-preview { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; color: var(--accent-teal); font-weight: 500; }
         .post-actions-bar { display: flex; gap: 16px; border-top: 1px solid var(--border-color); padding-top: 8px; }
-        .social-btn { background: none; border: none; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+        .social-btn { background: none; border: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500; }
 
         .trends-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
-        .trend-tag { background: var(--bg-card); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; color: var(--text-muted); }
+        .trend-tag { background: #ffffff; border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; color: var(--text-muted); }
 
-        /* Currency Grid Widget */
-        .exchange-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
-        .rate-card { background: var(--bg-main); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 6px; }
-        .rate-label { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); }
-        .rate-value { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
-
-        .fallback-box {
-            grid-column: span 2;
-            padding: 60px;
-            text-align: center;
-            color: var(--text-muted);
-        }
-        .fallback-box h3 { color: var(--text-main); margin-bottom: 8px; }
+        .fallback-box { text-align: center; color: var(--text-muted); padding: 40px; }
 
         /* ================== 🔥 MOBILE RESPONSIVE ENGINE MEDIA QUERY ================== */
-        @media (max-width: 850px) {
-            body {
-                flex-direction: column;
-                padding-bottom: 70px; /* Leaves clean breathing space for bottom nav bar */
+        @media (max-width: 900px) {
+            .menu-toggle-btn {
+                display: block; /* Show hamburger icon on mobile */
             }
 
-            /* Transform Left Sidebar into App-Style Fixed Bottom Nav Bar */
+            /* Transform permanent sidebar into hidden slide-out drawer */
             .sidebar {
-                width: 100%;
-                height: 60px;
-                flex-direction: row;
-                padding: 4px 10px;
-                border-right: none;
-                border-top: 1px solid var(--border-color);
-                position: fixed;
-                top: auto;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+                transform: translateX(-100%); /* Slide completely off-screen by default */
+                box-shadow: 4px 0 12px rgba(0,0,0,0.1);
+                z-index: 1600;
             }
 
-            .sidebar-brand, .sidebar-footer {
-                display: none; /* Hide clean headers/footers to maximize touch space */
+            /* Toggle State for Drawer via JavaScript class injection */
+            .sidebar.drawer-open {
+                transform: translateX(0); /* Slide into full view */
             }
 
-            .nav-menu {
-                flex-direction: row;
-                justify-content: space-around;
-                width: 100%;
-                gap: 2px;
-            }
-
-            .nav-item {
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 3px;
-                font-size: 0.65rem; /* Text size for mobile icons */
-                padding: 4px 6px;
-                flex: 1;
-                text-align: center;
-                border-radius: 4px;
-            }
-
-            /* Main Layout Adjustments for Mobile Views */
             .main-wrapper {
                 margin-left: 0;
                 padding: 12px;
-                width: 100%;
             }
 
             .master-layout.active-page {
-                grid-template-columns: 1fr; /* Switch double pillars down into single vertical line stack */
-                gap: 14px;
+                grid-template-columns: 1fr; /* Drop secondary columns to single scroll line layout */
             }
 
-            .deposit-grid {
-                grid-template-columns: 1fr 1fr; /* Retains clean side-by-side metric tiles */
-            }
-
-            .fallback-box {
-                padding: 30px 15px;
+            .right-pillar {
+                order: -1; /* Pushes the input composer and filter tags above the metric grids */
             }
         }
     </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <h2>Project 13</h2>
+    <!-- ================= PREMIUM GLOBAL APP TOP BAR ================= -->
+    <header class="top-header">
+        <div class="header-left">
+            <button class="menu-toggle-btn" id="drawerToggle" onclick="toggleSidebarDrawer()">☰</button>
+            <div class="header-logo-container">
+                <img src="Project 13 logo.png" alt="Logo" class="header-logo-img" onerror="this.style.style.display='none'; document.getElementById('hdr-txt').style.display='block';">
+                <span id="hdr-txt" style="display:none; color:white; font-weight:800; font-size:0.9rem; letter-spacing:0.5px;">P13</span>
+            </div>
         </div>
-        <nav class="nav-menu">
-            <div class="nav-item active" data-target="dashboard-page">📊 Dashboard</div>
-            <div class="nav-item" data-target="deposits-page">💳 Deposits</div>
-            <div class="nav-item" data-target="expenses-page">🧾 Expenses</div>
-            <div class="nav-item" data-target="investments-page">📈 Investments</div>
-            <div class="nav-item" data-target="revenue-page">🔄 Rev & Loss</div>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="nav-item">🔔 Notifications</div>
-        </div>
-    </aside>
-
-    <main class="main-wrapper">
         
-        <div class="master-layout active-page" id="dashboard-page">
+        <div class="header-right">
+            <button class="header-icon-btn" onclick="alert('Settings menu loading...')">⚙️</button>
+            <div class="header-avatar" title="My Account Profile" onclick="alert('Profile configurations...')">ME</div>
+        </div>
+    </header>
+
+    <!-- Background dim overlay for mobile sidebar navigation drawer -->
+    <div class="sidebar-overlay" id="drawerOverlay" onclick="toggleSidebarDrawer()"></div>
+
+    <!-- ================= STRUCTURAL APP MAIN CONTAINER ================= -->
+    <div class="app-container">
+
+        <!-- SLIDING SIDE DRAWER SIDEBAR BAR INTERFACE -->
+        <aside class="sidebar" id="appSidebar">
+            <nav class="nav-menu">
+                <div class="nav-item active" data-target="dashboard-page">📊 Dashboard</div>
+                <div class="nav-item" data-target="deposits-page">💳 Deposits</div>
+                <div class="nav-item" data-target="expenses-page">🧾 Expenses</div>
+                <div class="nav-item" data-target="investments-page">📈 Investments</div>
+                <div class="nav-item" data-target="revenue-page">🔄 Rev & Loss</div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="nav-item" onclick="alert('Logging out safely...')">🚪 Log Out</div>
+            </div>
+        </aside>
+
+        <!-- MAIN SCROLL STREAM ENGINE AREA -->
+        <main class="main-wrapper">
             
-            <div class="left-pillar">
-                <div class="brand-header-card">
-                    <div class="logo-container">
-                        <img src="Project 13 logo.png" alt="Project 13 Logo" class="main-logo-img" onerror="this.style.display='none'; document.getElementById('fb-txt').style.display='block';">
-                        <div id="fb-txt" style="display:none; padding:25px; font-weight:700; font-size:1.2rem; color:#ffffff; text-align:center;">
-                            PROJECT 13 PARTNERSHIP
+            <!-- ================= SUB PAGE LAYER 1: GENERAL DASHBOARD FEED ================= -->
+            <div class="master-layout active-page" id="dashboard-page">
+                
+                <!-- PRIMARY SCROLL TIMELINE FEED PILLAR -->
+                <div class="right-pillar">
+                    <!-- Dynamic Log Scrolling Badges -->
+                    <div class="trends-scroll">
+                        <div class="trend-tag">📈 Organic Farming</div>
+                        <div class="trend-tag">⚡ AI Agencies</div>
+                        <div class="trend-tag">🌱 Jute Micro-Export</div>
+                        <div class="trend-tag">📦 Tech E-Commerce</div>
+                    </div>
+
+                    <!-- Publisher Unit Module Widget -->
+                    <div class="create-post-box">
+                        <div class="creator-header">
+                            <div class="avatar" style="background-color: #db2777;">ME</div>
+                            <textarea id="postInput" class="post-textarea" rows="1" placeholder="What's your field update today?"></textarea>
+                        </div>
+                        <div class="action-tray">
+                            <div class="upload-options">
+                                <button class="upload-btn" onclick="stageAttachment('📷 Photo Log Attached')">📷 Photo</button>
+                                <button class="upload-btn" onclick="stageAttachment('📄 LC_Draft_v1.pdf')">📄 Document</button>
+                                <button class="upload-btn" onclick="stageAttachment('📍 Karwan Bazar, Dhaka')">📍 Location</button>
+                            </div>
+                            <button class="submit-post-btn" onclick="executePublish()">Post</button>
+                        </div>
+                        <div id="attachmentIndicator" style="margin-top: 6px; font-size: 0.7rem; color: var(--accent-teal); display: none; font-weight: 600;"></div>
+                    </div>
+
+                    <!-- Interactive Live Timeline Logs Stream Container -->
+                    <div class="feed-container" id="feed">
+                        <div class="post-card">
+                            <div class="post-meta">
+                                <div class="user-info">
+                                    <div class="avatar" style="background-color: #4b5563;">M4</div>
+                                    <div>
+                                        <div class="username">Member 4 (Sourcing Manager)</div>
+                                        <div class="timestamp">Today at 10:42 AM</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                Just finalized the quality check metrics for our target footwear inventory lines. Attaching the full specification overview here for group review.
+                            </div>
+                            <div class="attachment-preview"><span>📄 Footwear_Specs_v2.pdf (1.4 MB)</span></div>
+                            <div class="post-actions-bar">
+                                <button class="social-btn" onclick="alert('Upvoted!')">🔥 Upvote (5)</button>
+                                <button class="social-btn">💬 Discuss (2)</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="meta-bar">
-                        <div class="portal-tag">Ops Portal</div>
-                        <div class="time-box">
+                </div>
+
+                <!-- SECONDARY SIDE PILLAR (METRICS BOXES) -->
+                <div class="left-pillar">
+                    <!-- Dynamic Live Sync Clock Widget Layer -->
+                    <div class="meta-strip">
+                        <div class="portal-tag">Operational Portal</div>
+                        <div>
                             <div class="live-time">00:00:00 AM</div>
-                            <div class="live-date">Loading...</div>
+                            <div class="live-date">Loading System...</div>
                         </div>
                     </div>
-                </div>
 
-                <div class="view-filter-tray">
-                    <button class="filter-btn active" id="ownViewBtn" onclick="toggleViewPerspective('own')">Own View</button>
-                    <button class="filter-btn" id="allViewBtn" onclick="toggleViewPerspective('all')">All View</button>
-                </div>
+                    <!-- Perspective Switch Tray -->
+                    <div class="view-filter-tray">
+                        <button class="filter-btn active" id="ownViewBtn" onclick="toggleViewPerspective('own')">Own View</button>
+                        <button class="filter-btn" id="allViewBtn" onclick="toggleViewPerspective('all')">All View</button>
+                    </div>
 
-                <section class="deposit-grid">
-                    <div class="card">
-                        <div class="card-title" id="title-box-1">My Deposit</div>
-                        <div class="card-value teal-text" id="val-box-1">৳15,000</div>
-                    </div>
-                    <div class="card">
-                        <div class="card-title" id="title-box-2">My Dues</div>
-                        <div class="card-value red-text" id="val-box-2">৳2,500</div>
-                    </div>
-                    <div class="card card-full-width">
-                        <div class="card-title" id="title-box-3">Total Fund Deposits</div>
-                        <div class="card-value" id="val-box-3">৳401,100</div>
-                    </div>
-                </section>
-
-                <section class="exchange-box">
-                    <h2 class="section-title">Logistics Exchange Rates</h2>
-                    <div class="exchange-grid">
-                        <div class="rate-card">
-                            <div class="rate-label">USD to BDT</div>
-                            <div class="rate-value">৳117.80</div>
+                    <!-- Financial Status Data Box Matrix -->
+                    <section class="deposit-grid">
+                        <div class="card">
+                            <div class="card-title" id="title-box-1">My Deposit</div>
+                            <div class="card-value teal-text" id="val-box-1">৳15,000</div>
                         </div>
-                        <div class="rate-card">
-                            <div class="rate-label">CNY to BDT</div>
-                            <div class="rate-value">৳16.22</div>
+                        <div class="card">
+                            <div class="card-title" id="title-box-2">My Dues</div>
+                            <div class="card-value red-text" id="val-box-2">৳2,500</div>
                         </div>
-                    </div>
-                </section>
+                        <div class="card card-full-width">
+                            <div class="card-title" id="title-box-3">Total Fund Deposits</div>
+                            <div class="card-value" id="val-box-3">৳401,100</div>
+                        </div>
+                    </section>
 
-                <section class="list-container">
-                    <h2 class="section-title">Current Asset Investments</h2>
-                    <div class="list-item">
-                        <div class="item-info">
-                            <span class="item-name">SME Capital Deployment</span>
-                            <span class="item-sub">Allocated: ৳200,000</span>
+                    <!-- Trade Currencies Logistics Converter Card -->
+                    <section class="exchange-box">
+                        <h2 class="section-title">Logistics Exchange Rates</h2>
+                        <div class="exchange-grid">
+                            <div class="rate-card">
+                                <div class="rate-label">USD to BDT</div>
+                                <div class="rate-value">৳117.80</div>
+                            </div>
+                            <div class="rate-card">
+                                <div class="rate-label">CNY to BDT</div>
+                                <div class="rate-value">৳16.22</div>
+                            </div>
                         </div>
-                        <span class="status-badge">Active</span>
-                    </div>
-                </section>
+                    </section>
 
-                <section class="list-container">
-                    <h2 class="section-title">Future Potential Pipelines</h2>
-                    <div class="list-item">
-                        <div class="item-info">
-                            <span class="item-name">Commercial Agro Venture</span>
-                            <span class="item-sub">Target Launch: Q3</span>
+                    <!-- Portfolios List -->
+                    <section class="list-container">
+                        <h2 class="section-title">Current Asset Investments</h2>
+                        <div class="list-item">
+                            <div class="item-info">
+                                <span class="item-name">SME Capital Deployment</span>
+                                <span class="item-sub">Allocated: ৳200,000</span>
+                            </div>
+                            <span class="status-badge">Active</span>
                         </div>
-                        <span class="status-badge pipeline">Evaluating</span>
-                    </div>
-                    <div class="list-item">
-                        <div class="item-info">
-                            <span class="item-name">Import & Retail Sourcing</span>
-                            <span class="item-sub">Feasibility Phase</span>
-                        </div>
-                        <span class="status-badge pipeline">Evaluating</span>
-                    </div>
-                </section>
+                    </section>
 
-                <section>
-                    <div class="inflation-box">
+                    <!-- Evaluation Project Streams -->
+                    <section class="list-container">
+                        <h2 class="section-title">Future Potential Pipelines</h2>
+                        <div class="list-item">
+                            <div class="item-info">
+                                <span class="item-name">Commercial Agro Venture</span>
+                                <span class="item-sub">Target Launch: Q3</span>
+                            </div>
+                            <span class="status-badge pipeline">Evaluating</span>
+                        </div>
+                        <div class="list-item">
+                            <div class="item-info">
+                                <span class="item-name">Import & Retail Sourcing</span>
+                                <span class="item-sub">Feasibility Phase</span>
+                            </div>
+                            <span class="status-badge pipeline">Evaluating</span>
+                        </div>
+                    </section>
+
+                    <!-- Macro Tracker Data Chart Frame -->
+                    <section class="inflation-box">
                         <div class="inflation-stats">
                             <div>
                                 <h2 class="section-title">Market Inflation Tracker</h2>
@@ -480,93 +573,65 @@
                             <div class="bar growing" style="height: 75%;"></div>
                             <div class="bar active-trend" style="height: 94%;"></div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                </div>
+
             </div>
 
-            <div class="right-pillar">
-                <div class="trends-scroll">
-                    <div class="trend-tag">📈 Organic Farming</div>
-                    <div class="trend-tag">⚡ AI Agencies</div>
-                    <div class="trend-tag">🌱 Jute Micro-Export</div>
-                    <div class="trend-tag">📦 Tech E-Commerce</div>
-                </div>
-
-                <div class="create-post-box">
-                    <div class="creator-header">
-                        <div class="avatar" style="background-color: #db2777;">ME</div>
-                        <textarea id="postInput" class="post-textarea" rows="2" placeholder="Write field log, link documents..."></textarea>
-                    </div>
-                    <div class="action-tray">
-                        <div class="upload-options">
-                            <button class="upload-btn" onclick="stageAttachment('📷 Field Photo Attached')">📷 Photo</button>
-                            <button class="upload-btn" onclick="stageAttachment('📄 LC_Draft_v1.pdf')">📄 Doc</button>
-                            <button class="upload-btn" onclick="stageAttachment('📍 Karwan Bazar, Dhaka')">📍 Loc</button>
-                        </div>
-                        <button class="submit-post-btn" onclick="executePublish()">Publish</button>
-                    </div>
-                    <div id="attachmentIndicator" style="margin-top: 6px; font-size: 0.7rem; color: var(--accent-teal); display: none; font-weight: 600;"></div>
-                </div>
-
-                <div class="feed-container" id="feed">
-                    <div class="post-card">
-                        <div class="post-meta">
-                            <div class="user-info">
-                                <div class="avatar" style="background-color: #4b5563;">M4</div>
-                                <div>
-                                    <div class="username">Member 4 (Sourcing Manager)</div>
-                                    <div class="timestamp">Today at 10:42 AM</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="post-content">
-                            Just finalized the quality check metrics for our target footwear inventory lines. Attaching the full specification overview here for group review.
-                        </div>
-                        <div class="attachment-preview"><span>📄 Footwear_Specs_v2.pdf (1.4 MB)</span></div>
-                        <div class="post-actions-bar">
-                            <button class="social-btn" onclick="alert('Upvoted!')">🔥 Upvote (5)</button>
-                            <button class="social-btn">💬 Discuss (2)</button>
-                        </div>
-                    </div>
+            <!-- ================= SUB PAGE LAYER 2: DEPOSITS LEDGER SHEET ================= -->
+            <div class="master-layout" id="deposits-page">
+                <div class="fallback-box">
+                    <h3>💳 Deposits Ledger Panel</h3>
+                    <p>Detailed tracking of monthly ledger logs maps natively inside this framework view.</p>
                 </div>
             </div>
 
-        </div>
-
-        <div class="master-layout" id="deposits-page">
-            <div class="fallback-box">
-                <h3>💳 Deposits Ledger Panel</h3>
-                <p>Detailed tracking of monthly ledger logs maps natively inside this framework view.</p>
+            <!-- ================= SUB PAGE LAYER 3: EXPENSES LEDGER SHEET ================= -->
+            <div class="master-layout" id="expenses-page">
+                <div class="fallback-box">
+                    <h3>🧾 Expenses Allocation Streams</h3>
+                    <p>Procurement allocations and asset stream logging configurations.</p>
+                </div>
             </div>
-        </div>
 
-        <div class="master-layout" id="expenses-page">
-            <div class="fallback-box">
-                <h3>🧾 Expenses Allocation Streams</h3>
-                <p>Procurement allocations and asset stream logging configurations.</p>
+            <!-- ================= SUB PAGE LAYER 4: INVESTMENTS LEDGER SHEET ================= -->
+            <div class="master-layout" id="investments-page">
+                <div class="fallback-box">
+                    <h3>📈 Project Venture Breakdown</h3>
+                    <p>Active timeline scheduling metrics matrices.</p>
+                </div>
             </div>
-        </div>
 
-        <div class="master-layout" id="investments-page">
-            <div class="fallback-box">
-                <h3>📈 Project Venture Breakdown</h3>
-                <p>Active timeline scheduling metrics matrices.</p>
+            <!-- ================= SUB PAGE LAYER 5: REVENUE LEDGER SHEET ================= -->
+            <div class="master-layout" id="revenue-page">
+                <div class="fallback-box">
+                    <h3>🔄 Profit Allocation Matrix</h3>
+                    <p>Yield metrics mapping distributions over standard business cycles.</p>
+                </div>
             </div>
-        </div>
 
-        <div class="master-layout" id="revenue-page">
-            <div class="fallback-box">
-                <h3>🔄 Profit Allocation Matrix</h3>
-                <p>Yield metrics mapping distributions over standard business cycles.</p>
-            </div>
-        </div>
+        </main>
+    </div>
 
-    </main>
-
+    <!-- ================= BACKEND CORE SYSTEM ENGINE CONTROLLERS ================= -->
     <script>
         let stagedAttachment = "";
 
-        // Tab Swapping Script Hook Engine Logic
+        // Mobile Slide Drawer Menu Mechanics Handler
+        function toggleSidebarDrawer() {
+            const sidebar = document.getElementById("appSidebar");
+            const overlay = document.getElementById("drawerOverlay");
+            
+            sidebar.classList.toggle("drawer-open");
+            
+            if (sidebar.classList.contains("drawer-open")) {
+                overlay.style.display = "block";
+            } else {
+                overlay.style.display = "none";
+            }
+        }
+
+        // Sidebar Routing Navigation Logic Loops
         const navItems = document.querySelectorAll('.nav-item');
         const pages = document.querySelectorAll('.master-layout');
 
@@ -581,12 +646,17 @@
                 pages.forEach(p => p.classList.remove('active-page'));
                 document.getElementById(targetPageId).classList.add('active-page');
                 
-                // Automatically scrolls window to top when changing views on mobile screen frames
+                // If drawer menu window is active on mobile platform screen frames, slide it shut automatically
+                const sidebar = document.getElementById("appSidebar");
+                if (sidebar.classList.contains("drawer-open")) {
+                    toggleSidebarDrawer();
+                }
+                
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
-        // Perspective Swapping Calculation Engine Logic (Own View vs All View)
+        // Perspective Logic Data Set Matrix Mapping Toggle (Own View vs All View)
         function toggleViewPerspective(type) {
             const ownBtn = document.getElementById('ownViewBtn');
             const allBtn = document.getElementById('allViewBtn');
@@ -621,7 +691,7 @@
             }
         }
 
-        // Live Log Feed Attachment Handling
+        // Live Log Attachment Handling
         function stageAttachment(desc) {
             stagedAttachment = desc;
             const indicator = document.getElementById("attachmentIndicator");
@@ -629,7 +699,7 @@
             indicator.style.display = "block";
         }
 
-        // Live Stream Post Execution Code
+        // Live Stream Post Execution Engine Logic
         function executePublish() {
             const textInput = document.getElementById("postInput");
             const text = textInput.value.trim();
@@ -653,7 +723,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="post-content">${text || "Shared an operational log link attachment update."}</div>
+                <div class="post-content">${text || "Shared an operational log update."}</div>
                 ${attachmentHTML}
                 <div class="post-actions-bar">
                     <button class="social-btn" onclick="alert('Upvoted!')">🔥 Upvote (0)</button>
@@ -666,7 +736,7 @@
             document.getElementById("attachmentIndicator").style.display = "none";
         }
 
-        // System Sync Live Clock Engine Integration
+        // Clock Sync Real-Time Engine Setup
         function updateSystemClock() {
             const now = new Date();
             let hours = now.getHours();
